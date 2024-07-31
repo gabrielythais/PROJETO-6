@@ -1,0 +1,228 @@
+# Data Analysis and Visualization Tool
+
+This repository contains a Python-based data analysis and visualization tool designed to automate the process of exploratory data analysis (EDA). It includes functions to load data from various sources, perform comprehensive EDA, and generate insightful visualizations. The tool also allows for specialized analysis, enabling users to add their own conclusions and insights.
+
+## Features
+
+1. **Data Loading**: Load data from CSV files, including files hosted on Google Drive.
+2. **Exploratory Data Analysis**: Perform EDA by printing basic information, descriptive statistics, and generating a variety of plots.
+3. **Visualizations**: Generate histograms, bar charts, pie charts, line plots, scatter plots, box plots, and correlation matrices.
+4. **Specialized Analysis**: Add custom analysis and insights.
+
+## Dependencies
+
+- Python 3.x
+- pandas
+- matplotlib
+- seaborn
+- requests
+- io
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/data-analysis-visualization-tool.git
+cd data-analysis-visualization-tool
+```
+
+Install the required Python packages:
+
+```bash
+pip install pandas matplotlib seaborn requests
+```
+
+## Usage
+
+### Loading Data
+
+To load data, the `carregar_dados` function accepts a URL to a CSV file. It handles both direct links and Google Drive links.
+
+### Exploratory Data Analysis
+
+The `analise_exploratoria` function performs EDA by displaying the first few rows of the DataFrame, DataFrame information, and descriptive statistics. It also generates a variety of plots to visualize the data.
+
+### Visualizations
+
+The tool includes the following plotting functions:
+
+- `plot_histograma`: Generates a histogram of a random numeric column.
+- `plot_grafico_de_barras`: Generates a bar chart of a random categorical column.
+- `plot_grafico_de_pizza`: Generates a pie chart of a random categorical column.
+- `plot_grafico_de_linha`: Generates a line plot of two random numeric columns.
+- `plot_grafico_de_dispersao`: Generates a scatter plot of two random numeric columns.
+- `plot_boxplot`: Generates a box plot for numeric columns.
+- `identificacao_correlacoes`: Generates a correlation matrix for numeric columns.
+
+### Specialized Analysis
+
+The `analise_especialista` function allows users to add their own custom analysis and insights.
+
+### Example
+
+Here's an example of how to use the tool:
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import requests
+from io import StringIO
+import random
+
+def carregar_dados(url, tipo_arquivo='CSV'):
+    try:
+        if 'drive.google.com' in url:
+            file_id = url.split('/')[-2]
+            download_url = f"https://drive.google.com/uc?id={file_id}"
+            response = requests.get(download_url).content
+            df = pd.read_csv(StringIO(response.decode('utf-8')))
+        else:
+            df = pd.read_csv(url)
+        return df
+    except Exception as e:
+        print(f"Erro ao carregar os dados: {e}")
+        return None
+
+def analise_exploratoria(df):
+    print("Primeiras linhas do DataFrame:")
+    print(df.head())
+    
+    print("\nInformações sobre o DataFrame:")
+    print(df.info())
+    
+    print("\nEstatísticas descritivas das variáveis numéricas:")
+    print(df.describe())
+    
+    plot_histograma(df)
+    plot_grafico_de_barras(df)
+    plot_grafico_de_pizza(df)
+    plot_grafico_de_linha(df)
+    plot_grafico_de_dispersao(df)
+    plot_boxplot(df)
+    identificacao_correlacoes(df)
+
+def plot_histograma(df):
+    print("\nHistograma:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 0:
+        sns.histplot(data=df, x=random.choice(numeric_columns), kde=True)
+        plt.title('Histograma')
+        plt.show()
+    else:
+        print("Não há variáveis numéricas para plotar o histograma.")
+
+def plot_grafico_de_barras(df):
+    print("\nGráfico de Barras:")
+    categorical_columns = df.select_dtypes(include=['object']).columns
+    if len(categorical_columns) > 0:
+        col = random.choice(categorical_columns)
+        if df[col].nunique() > 0:
+            sns.countplot(data=df, x=col)
+            plt.title('Gráfico de Barras')
+            plt.show()
+        else:
+            print(f"Não há dados únicos para a variável '{col}' para plotar o gráfico de barras.")
+    else:
+        print("Não há variáveis categóricas para plotar o gráfico de barras.")
+
+def plot_grafico_de_pizza(df):
+    print("\nGráfico de Pizza:")
+    categorical_columns = df.select_dtypes(include=['object']).columns
+    if len(categorical_columns) > 0:
+        col = random.choice(categorical_columns)
+        if df[col].nunique() > 0:
+            counts = df[col].value_counts()
+            if counts.max() == 1:
+                plt.pie(counts, labels=counts.index, autopct='%1.1f%%')
+                plt.title('Gráfico de Pizza')
+                plt.show()
+            else:
+                print(f"A variável '{col}' possui valores duplicados e não pode ser plotada no gráfico de pizza.")
+        else:
+            print(f"Não há dados únicos para a variável '{col}' para plotar o gráfico de pizza.")
+    else:
+        print("Não há variáveis categóricas para plotar o gráfico de pizza.")
+
+def plot_grafico_de_linha(df):
+    print("\nGráfico de Linha:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 1:
+        cols = random.sample(list(numeric_columns), 2)
+        df[cols].plot()
+        plt.title('Gráfico de Linha')
+        plt.xlabel(cols[0])
+        plt.ylabel(cols[1])
+        plt.show()
+    else:
+        print("Não há duas variáveis numéricas para plotar o gráfico de linha.")
+
+def plot_grafico_de_dispersao(df):
+    print("\nGráfico de Dispersão:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 1:
+        cols = random.sample(list(numeric_columns), 2)
+        sns.scatterplot(data=df, x=cols[0], y=cols[1])
+        plt.title('Gráfico de Dispersão')
+        plt.xlabel(cols[0])
+        plt.ylabel(cols[1])
+        plt.show()
+    else:
+        print("Não há duas variáveis numéricas para plotar o gráfico de dispersão.")
+
+def plot_boxplot(df):
+    print("\nBoxplot:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 0:
+        sns.boxplot(data=df[numeric_columns])
+        plt.title('Boxplot')
+        plt.show()
+    else:
+        print("Não há variáveis numéricas para plotar o boxplot.")
+
+def identificacao_correlacoes(df):
+    print("\nMatriz de Correlação:")
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    if len(numeric_columns) > 1:
+        sns.heatmap(df[numeric_columns].corr(), annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+        plt.title('Matriz de Correlação')
+        plt.show()
+    else:
+        print("Não há correlações a serem identificadas com menos de duas variáveis numéricas.")
+
+def analise_especialista():
+    print("\nAnálise especializada:")
+    print("Essa é a análise especializada do assunto.")
+    print("Você pode adicionar suas próprias conclusões e insights aqui.")
+
+def main(urls):
+    for url in urls:
+        df = carregar_dados(url)
+        if df is not None:
+            print("\nAnálise exploratória para o arquivo:", url)
+            analise_exploratoria(df)
+            print("\n---")
+
+    analise_especialista()
+
+urls = [
+    "https://drive.google.com/file/d/1ZPJ1lw7O9NQ31JBJqSrt85eykvt6lAoq/view?usp=sharing"
+]
+
+main(urls)
+```
+
+Replace `"https://drive.google.com/file/d/1ZPJ1lw7O9NQ31JBJqSrt85eykvt6lAoq/view?usp=sharing"` with your own data file URLs. Add more URLs to the `urls` list as needed.
+
+## Contributing
+
+Feel free to contribute to this project by submitting a pull request or opening an issue.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For any inquiries, please contact [your-email@example.com](mailto:your-email@example.com).
